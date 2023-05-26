@@ -37,6 +37,14 @@ android {
 
 dependencies {
 
+    //Coin
+    def koin_version = "3.4.0"
+    implementation "io.insert-koin:koin-core:$koin_version"
+
+    //Coroutines
+    def coroutines_version = "1.7.1"
+    implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core:$coroutines_version"
+    implementation "org.jetbrains.kotlinx:kotlinx-coroutines-android:$coroutines_version"
 
     // UI + Kotlin Core
     implementation 'androidx.core:core-ktx:1.10.1'
