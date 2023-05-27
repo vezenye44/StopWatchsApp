@@ -1,44 +1,36 @@
 package com.example.stopwatchsapp.ui
 
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.MutableLiveData
+ import androidx.lifecycle.LiveData
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.ViewModelProvider
-import com.example.stopwatchsapp.data.StopwatchListOrchestrator
+import androidx.lifecycle.asLiveData
+import com.example.stopwatchsapp.data.*
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.launch
-
-class MainViewModelFactory(
-    private val stopwatchListOrchestrator: StopwatchListOrchestrator,
-    private val viewModelScope: CoroutineScope,
-) : ViewModelProvider.NewInstanceFactory() {
-    override fun <T : ViewModel> create(modelClass: Class<T>): T {
-
-        if (modelClass.isAssignableFrom(MainViewModel::class.java)) {
-            return MainViewModel(stopwatchListOrchestrator, viewModelScope) as T
-        }
-        else throw IllegalArgumentException("Unknown ViewModel class")
-    }
-}
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
 
 class MainViewModel(
-    private val stopwatchListOrchestrator: StopwatchListOrchestrator,
-    private val viewModelScope: CoroutineScope,
+    private val elapsedTimeCalculator: ElapsedTimeCalculator,
+    private val stopwatchStateCalculator: StopwatchStateCalculator,
+    private val timestampFormatter: TimestampFormatter,
+    private val viewModelScope: CoroutineScope = CoroutineScope(Dispatchers.Main + SupervisorJob()),
 ) : ViewModel() {
 
-    private var _liveData = MutableLiveData<String>()
-    val liveData: LiveData<String> get() = _liveData
+    private val stateHolder = StopwatchStateHolder(
+        stopwatchStateCalculator,
+        elapsedTimeCalculator,
+        timestampFormatter
+    )
+    private val stopwatchListOrchestrator = StopwatchListOrchestrator(
+        stateHolder,
+        viewModelScope
+    )
+    private val liveData = stopwatchListOrchestrator.stateFlow.asLiveData()
 
-    init {
-        viewModelScope.launch {
-            stopwatchListOrchestrator.stateFlow.collect() {
-                _liveData.value = it
-            }
-        }
+    fun getLiveData(): LiveData<String> {
+        return liveData
     }
 
     fun start() = stopwatchListOrchestrator.start()
     fun pause() = stopwatchListOrchestrator.pause()
     fun stop() = stopwatchListOrchestrator.stop()
-
 }

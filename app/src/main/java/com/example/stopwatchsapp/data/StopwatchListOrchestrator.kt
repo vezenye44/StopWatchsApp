@@ -10,7 +10,7 @@ class StopwatchListOrchestrator(
 ) {
 
     private var job: Job? = null
-    private val mutableFlow = MutableStateFlow(DEFAULT_VALUE)
+    private val mutableFlow = MutableStateFlow(stateHolder.getStringTimeRepresentation())
     val stateFlow: StateFlow<String>
         get() = mutableFlow
 

@@ -4,7 +4,7 @@ import com.example.stopwatchsapp.domain.TimestampProvider
 import com.example.stopwatchsapp.domain.model.StopwatchState
 
 class ElapsedTimeCalculator(
-    private val timestampProvider: TimestampProvider
+    private val timestampProvider: TimestampProvider,
 ) {
 
     fun calculate(state: StopwatchState.Running): Long {

@@ -3,13 +3,9 @@ package com.example.stopwatchsapp.ui
 import android.os.Bundle
 import android.view.LayoutInflater
 import androidx.appcompat.app.AppCompatActivity
-import com.example.stopwatchsapp.data.*
 import com.example.stopwatchsapp.databinding.ActivityMainBinding
 import com.example.stopwatchsapp.databinding.StopwatchItemLayoutBinding
-import com.example.stopwatchsapp.domain.TimestampProvider
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.SupervisorJob
+import org.koin.androidx.viewmodel.ext.android.viewModel
 
 
 class MainActivity : AppCompatActivity() {
@@ -18,30 +14,7 @@ class MainActivity : AppCompatActivity() {
         ActivityMainBinding.inflate(layoutInflater)
     }
 
-    private val timestampProvider: TimestampProvider
-    private val elapsedTimeCalculator: ElapsedTimeCalculator
-    private val stopwatchStateCalculator: StopwatchStateCalculator
-    private val stopwatchStateHolder: StopwatchStateHolder
-    private val scope: CoroutineScope
-    private val stopwatchListOrchestrator: StopwatchListOrchestrator
-
-    init {
-        timestampProvider = TimestampProvider { System.currentTimeMillis() }
-        elapsedTimeCalculator = ElapsedTimeCalculator(timestampProvider)
-        stopwatchStateCalculator =
-            StopwatchStateCalculator(timestampProvider, elapsedTimeCalculator)
-        stopwatchStateHolder = StopwatchStateHolder(
-            stopwatchStateCalculator,
-            elapsedTimeCalculator,
-            TimestampFormatter()
-        )
-        scope = CoroutineScope(Dispatchers.Main + SupervisorJob())
-        stopwatchListOrchestrator = StopwatchListOrchestrator(stopwatchStateHolder, scope)
-    }
-
-    private val viewModel: MainViewModel by lazy {
-        MainViewModelFactory(stopwatchListOrchestrator, scope).create(MainViewModel::class.java)
-    }
+    private val viewModel: MainViewModel by viewModel()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -64,7 +37,7 @@ class MainActivity : AppCompatActivity() {
         binding.calculatorsContainer.addView(calculatorBinding.root)
 
 
-        viewModel.liveData.observe(this) {
+        viewModel.getLiveData().observe(this) {
             calculatorBinding.timeTextView.text = it
         }
     }
